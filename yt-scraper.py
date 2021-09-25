@@ -3,7 +3,6 @@ from os import path
 import re
 import csv
 import sys
-import json
 import requests
 import datetime
 
@@ -49,40 +48,6 @@ def Channel_Email(link):
 		return "NONE"
 	else:
 		return email
-
-def Last_Avg(link, avg_of):
-	base = "https://www.youtube.com/watch?v="
-	allVideoIds = set()
-	tries = 0
-	avgOn = avg_of
-	uniqueIds = set()
-
-	while len(allVideoIds) < avgOn and tries < 2:
-		response = requests.get(link)
-		page = response.text
-		videosIds = re.findall(r'"videoId":"([a-zA-Z0-9_-]+)","t', page)
-		uniqueIds.update(videosIds)
-
-		for vid in uniqueIds[:avgOn]:
-			vid_page = requests.get(base+vid)
-
-			if int(re.search(r'"lengthSeconds":"([0-9,]+)"', vid_page.text).groups()[0].replace(',','')) > 60:
-				allVideoIds.add(base+vid)
-
-		tries += 1
-
-	likeSum = 0
-	allVideoIds = allVideoIds[:avgOn]
-
-	for video in allVideoIds:
-		response = requests.get(video)
-		page = response.text
-		try:
-			likeSum += int(re.search(r'viewCountText":{"simpleText":"([0-9,]+) views"', page).groups()[0].replace(',',''))
-		except AttributeError:
-			pass
-
-	return likeSum//avgOn
 
 def Channel_Language(page_source):
 
@@ -239,41 +204,37 @@ def Get_All_Data(file_name, limit,
 		if(response.status_code == 200):
 
 			last_uploaded = Last_Uploaded(response.text)
-			print(f"\tProgress: {progress*100/steps}%", end='\r');progress += 1
+			print(f"\tProgress: {progress*100/steps:.0f}%", end='\r');progress += 1
 
 			channel_name = Channel_Name(response.text)
-			print(f"\tProgress: {progress*100/steps}%", end='\r');progress += 1
+			print(f"\tProgress: {progress*100/steps:.0f}%", end='\r');progress += 1
 			channel_lang = Channel_Language(response.text)
-			print(f"\tProgress: {progress*100/steps}%", end='\r');progress += 1
+			print(f"\tProgress: {progress*100/steps:.0f}%", end='\r');progress += 1
 			channel_email = Channel_Email(channel_links[i])
-			print(f"\tProgress: {progress*100/steps}%", end='\r');progress += 1
+			print(f"\tProgress: {progress*100/steps:.0f}%", end='\r');progress += 1
 
 			subs = Subscriber_Count(response.text)
-			print(f"\tProgress: {progress*100/steps}%", end='\r');progress += 1
+			print(f"\tProgress: {progress*100/steps:.0f}%", end='\r');progress += 1
 			subscriber_count, subscriber_unit = subs[0], subs[1]
 
-			avg_last_x_vid = Last_Avg(videos_page, avg_of)
-			print(f"\tProgress: {progress*100/steps}%", end='\r');progress += 1
-
 			description_keywords_present = "Present" if Description_Keywords(last_uploaded, description_keywords) else "NOT PRESENT"
-			print(f"\tProgress: {progress*100/steps}%", end='\r');progress += 1
+			print(f"\tProgress: {progress*100/steps:.0f}%", end='\r');progress += 1
 
 			active = "Active" if Active_Last(last_uploaded, days_range) else "NOT ACTIVE"
-			print(f"\tProgress: {progress*100/steps}%", end='\r');progress += 1
+			print(f"\tProgress: {progress*100/steps:.0f}%", end='\r');progress += 1
 
 			if key_count_keyword.strip() != '':
 				day_range_key = 30
 				max_retries = 3
 				max_videos = 40
 				key_count = Key_Count(videos_page, key_count_keyword, day_range_key, max_retries, max_videos)
-				print(f"\tProgress: {progress*100/steps}%", end='\r');progress += 1
+				print(f"\tProgress: {progress*100/steps:.0f}%", end='\r');progress += 1
 		
 		sleep(1)
 
 		data_recieved = [channel_links[i], channel_name, channel_lang, 
 						 channel_email, subscriber_count, subscriber_unit,
 						 description_keywords_present, active,
-						 avg_last_x_vid,
 						 ]
 		field = fields
 
@@ -311,7 +272,6 @@ def main(search_query, limit, key_count_keyword):
 					"Sub Unit", 
 					"Key Present", 
 					"Active or not in {} Days".format(day_range),
-					"Avg Views on Last {}(max) Vids".format(avg_of),
 					]
 	description_keywords: list = ["purchase", 
 								  "coupon", 
