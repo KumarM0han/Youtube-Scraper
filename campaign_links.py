@@ -2,14 +2,15 @@ import requests
 import csv
 import re
 import os
-import time
+import time 
 
-LINK = ["https://www.youtube.com/watch?v=SEnd9g3nXPY&feature=youtu.be",
-		"https://youtu.be/Q1YyPNF_iow",
-		"https://youtu.be/X64nYvzzbkA",
-		"https://youtu.be/zZP1-eqLqzE",
-		"https://youtu.be/fhQggsdDjcQ",
-	]
+
+# LINK = ["https://www.youtube.com/watch?v=SEnd9g3nXPY&feature=youtu.be",
+# 		"https://youtu.be/Q1YyPNF_iow",
+# 		"https://youtu.be/X64nYvzzbkA",
+# 		"https://youtu.be/zZP1-eqLqzE",
+# 		"https://youtu.be/fhQggsdDjcQ",
+	# ]
 # SLICES = {
 # 	"vid_id": slice(1, 2),
 # }
@@ -71,12 +72,15 @@ def main_driver():
 					new_link = "https://utm.guru/" + code
 					time.sleep(2.5)
 					camps.add( re.search( RE_CACHES.get("utm_campaign"), requests.get(new_link).url).group(1) )
-				data = {
-					'LINK' : attr['LINK'],
-					'CAMP' : '   '.join(camps),
-				}
-				writer.writerow(data)
-				print(f'DONE {ITER}')
+				SUB=1
+				for camp in camps : 
+					data = {
+						'LINK' : attr['LINK'],
+						'CAMP' : camp,
+					}
+					writer.writerow(data)
+					print(f'DONE {ITER} {SUB}')
+					SUB += 1
 				ITER += 1
 				os.remove( f'{get_vid_from_link(attr["LINK"])}.txt' )
 
