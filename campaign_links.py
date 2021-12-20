@@ -15,10 +15,10 @@ import time
 # 	"vid_id": slice(1, 2),
 # }
 RE_CACHES = {
-	"vid_id_comf" : re.compile(r'v=([a-zA-Z0-9_]+)&'),
+	"vid_id_comf" : re.compile(r'v=([a-zA-Z0-9_]+)'),
 	"vid_id_bef" : re.compile(r'.be/([a-zA-Z0-9_]+)'),
 	"utm_link" : re.compile(r'https://utm.guru/([_\w]{5})'),
-	"utm_campaign" : re.compile(r'utm_campaign=(.*?)&utm_medium')
+	"utm_campaign" : re.compile(r'utm_campaign=(.*?)(&|$)')
 }
 
 def get_vid_from_link(link: str = None) -> str:
